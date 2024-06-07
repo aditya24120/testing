@@ -1,0 +1,309 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                   String  @id @default(cuid())
+  userId               String
+  type                 String
+  provider             String
+  providerAccountId    String
+  refresh_token        String? @db.Text
+  access_token         String? @db.Text
+  expires_at           Int?
+  refresh_expires_at   Int?
+  obtainment_timestamp Int     @default(0)
+  token_type           String?
+  scope                String?
+  id_token             String?
+  session_state        String?
+  oauth_token_secret   String?
+  oauth_token          String?
+  username             String?
+  pageName             String?
+  pageId               String?
+  pageAccessToken      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                String              @id @default(cuid())
+  name              String?
+  email             String              @unique
+  emailVerified     DateTime?
+  image             String?
+  customer_id       String?
+  sub_id            String?
+  sub_type          Int?
+  sub_time_range    Int?
+  sub_time_created  Int?
+  sub_current_start Int?
+  sub_current_end   Int?
+  sub_status        String?
+  defaultClips      DefaultClipsStatus? @default(pending)
+  accounts          Account[]
+  settings          Setting?
+  sessions          Session[]
+  createdAt         DateTime            @default(now())
+  followerCount     Int                 @default(0)
+
+  CropType      CropTemplate[]
+  TwitchClip    TwitchClip[]
+  Role          Role           @default(USER)
+  ScheduledDays ScheduledDays?
+  Clip          Clip[]
+}
+
+model VerificationToken {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Setting {
+  id                        String    @id @default(cuid())
+  delay                     Int       @default(24)
+  hastags                   String?
+  minViewCount              Int       @default(10)
+  uploadFrequency           Int       @default(8)
+  license                   String?
+  camCrop                   Json?
+  screenCrop                Json?
+  cropType                  CropType?
+  verticalVideoEnabled      Boolean   @default(true)
+  uploadEnabled             Boolean   @default(false)
+  defaultApprove            Boolean   @default(false)
+  approveDate               DateTime?
+  mainTutorialComplete      Boolean   @default(false)
+  clipsTutorialComplete     Boolean   @default(false)
+  youtubeHashtags           String[]
+  youtubeTags               String?
+  youtubePrivacy            String    @default("private")
+  youtubeAutoCategorization Boolean   @default(true)
+  youtubeCategory           String    @default("Gaming")
+  youtubeDescription        String?
+  instagramCaption          String?
+  lastUploaded              DateTime?
+  lastUploadedId            String?
+  lastUploadTiktok          DateTime?
+  lastUploadYoutube         DateTime?
+  lastInstagramYoutube      DateTime?
+  lastUploadedClipYouTube   String?
+  lastUploadedClipTiktok    String?
+  lastUploadedClipInstagram String?
+  uploadCount               Int       @default(0)
+  selectedPlatforms         String[]
+  youtubeCount              Int       @default(0)
+  tiktokCount               Int       @default(0)
+  instagramCount            Int       @default(0)
+  timeOffset                Int?
+  instagramHashtags         String[]
+  autoCaption               Boolean   @default(false)
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String         @unique
+  CropType      CropTemplate[]
+  updatedAt     DateTime       @updatedAt()
+  ScheduledDays ScheduledDays?
+}
+
+model Clip {
+  id                  String    @id @default(cuid())
+  userId              String
+  broadcasterName     String
+  broadcasterId       String
+  creatorName         String
+  creatorId           String
+  embedUrl            String
+  gameId              String
+  language            String
+  title               String
+  url                 String
+  videoId             String
+  viewCount           Int
+  thumbnailUrl        String
+  createdAt           DateTime
+  downloadUrl         String
+  approved            Boolean   @default(false)
+  status              String?
+  uploadPlatforms     String[]
+  uploadTime          DateTime?
+  scheduledUploadTime DateTime?
+  uploaded            Boolean   @default(false)
+  youtubeUploaded     Boolean   @default(false)
+  youtubeUploadTime   DateTime?
+  youtubeStatus       String?
+  tiktokUploaded      Boolean   @default(false)
+  tiktokUploadTime    DateTime?
+  tiktokStatus        String?
+  instagramUploaded   Boolean   @default(false)
+  instagramUploadTime DateTime?
+  instagramStatus     String?
+  facebookUploaded    Boolean   @default(false)
+  facebookUploadTime  DateTime?
+  facebookStatus      String?
+  facebookDescription String?
+  youtubePrivacy      String    @default("private")
+  youtubeCategory     String?
+  cropData            Json
+  caption             String?
+  youtubeTitle        String?
+  description         String?
+  renderedUrl         String?
+  updatedAt           DateTime  @updatedAt()
+  twitch_id           String
+  autoCaption         Boolean   @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, twitch_id])
+}
+
+model TwitchClip {
+  id                  String        @id @default(cuid())
+  twitch_id           String
+  broadcaster_name    String
+  broadcaster_id      String
+  creator_name        String
+  creator_id          String
+  embed_url           String
+  game_id             String
+  language            String
+  title               String
+  url                 String
+  video_id            String
+  view_count          Int
+  thumbnail_url       String
+  created_at          String
+  download_url        String
+  uploaded            Boolean       @default(false)
+  uploadPlatforms     String[]
+  approved            Boolean       @default(false)
+  scheduled           Boolean       @default(false)
+  approvedStatus      ApproveStatus @default(NOT_APPROVED)
+  youtubePrivacy      String        @default("private")
+  youtubeCategory     String?
+  youtubeTitle        String?
+  youtubeHashtags     String[]
+  youtubeDescription  String?
+  cropType            CropType?
+  caption             String?
+  instagramHashtags   String[]
+  facebookDescription String?
+  startTime           Float?
+  endTime             Float?
+  autoCaption         Boolean       @default(false)
+  transcribeComplete  Boolean       @default(false)
+  duration            Float         @default(0)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@unique([userId, twitch_id])
+}
+
+model CropTemplate {
+  id         String   @id @default(cuid())
+  name       String   @default("default")
+  cropType   CropType
+  camCrop    Json?
+  screenCrop Json
+
+  setting   Setting @relation(fields: [settingId], references: [id], onDelete: Cascade)
+  settingId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  @@unique([name, cropType, settingId])
+}
+
+model ScheduledDays {
+  id        String   @id @default(cuid())
+  sun       String[]
+  mon       String[]
+  tue       String[]
+  wed       String[]
+  thu       String[]
+  fri       String[]
+  sat       String[]
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @unique
+  setting   Setting  @relation(fields: [settingId], references: [id], onDelete: Cascade)
+  settingId String   @unique
+}
+
+model Transcription {
+  id String @id @default(cuid())
+
+  completedAt DateTime
+  createdAt   DateTime
+  startedAt   DateTime
+  status      TranscribeStatus
+  jobId       String
+  format      String
+  audioPath   String
+  textOutput  String           @db.Text
+  subtitles   String           @db.Text
+  language    String
+  version     String
+  twitchId    String           @unique
+}
+
+enum TranscribeStatus {
+  starting
+  processing
+  succeeded
+  failed
+  canceled
+}
+
+enum ApproveStatus {
+  NOT_APPROVED
+  MANUAL_APPROVE
+  AUTO_APPROVE
+  CANCELED
+}
+
+enum CropType {
+  NO_CAM
+  CAM_TOP
+  CAM_FREEFORM
+  FREEFORM
+}
+
+enum DefaultClipsStatus {
+  pending
+  inqueue
+  complete
+  failed
+}
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
