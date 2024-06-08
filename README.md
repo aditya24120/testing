@@ -200,12 +200,3 @@ npx dotenv-vault pull production
 ```
 
 - [Additional dotenv-vault Information](https://github.com/dotenv-org/dotenv-vault)
-
-# ARCHITECTURE DIAGRAMS FOR CLIPBOT:
-
-## ER-diagram:
-![ER-diagram-clipbot-project](https://github.com/Shopvana/clipbot-nextjs/assets/129294554/3a9d3830-a087-44ce-80a4-308746e3637b)
-## Mind-Map:
-![mind-map-clipbot-project](https://github.com/Shopvana/clipbot-nextjs/assets/129294554/809e7558-2672-490b-8e15-08ecf1b34c86)
-## State-chart-diagram:
-![state-chart-clipbot-project](https://github.com/Shopvana/clipbot-nextjs/assets/129294554/439aee3c-883e-4bad-add6-b0557230effc)
