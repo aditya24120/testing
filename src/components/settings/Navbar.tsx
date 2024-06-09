@@ -34,7 +34,7 @@ const Navbar = () => {
   return (
     <div className="mb-2 mt-2 flex w-full items-center rounded-md text-xs font-semibold uppercase text-violet-300 md:mb-4 md:mt-6 md:w-11/12 md:text-base">
       {navItems.map((item) => (
-        <Link key={item.state} href={item.href} target="_blank" rel="noreferrer">
+        <Link key={item.state} href={item.href} rel="noreferrer">
           <a
             className={`w-1/3 border-b-4 text-center tracking-widest last:hidden hover:text-violet md:w-1/4 md:last:block ${
               currentRoute === item.href ? 'border-violet font-bold text-violet' : 'border-grey-100'
