@@ -26,6 +26,20 @@ yarn install
 ### Setting up Environment Variables:
 - Create a dotenv (.env) file in the project's root directory that will be used to store all the environment variables.
 
+### List of Services:
+- JSON Web Token (JWT): Used for secure token verification, typically for user authentication and authorization.
+- Crop Video Microservice: Utilized for video cropping functionalities within the application, ensuring efficient media processing.
+- Postgres Database: Stores user data securely, providing a reliable and scalable solution for data management.
+- NextAuth: Employs Next.js for seamless authentication processes, enhancing user experience and security.
+- Twitch OAuth: Enables integration with Twitch for user authentication and access to Twitch APIs and services.
+- Stripe: Facilitates payment processing and subscription management, ensuring secure transactions within the application.
+- TikTok OAuth: Allows integration with TikTok for user authentication and access to TikTok APIs and services.
+- YouTube OAuth: Permits integration with YouTube for user authentication and access to YouTube APIs and services.
+- Amplitude: Tracks user behavior and engagement within the application, providing valuable insights for analytics and optimization.
+- SendGrid: Sends transactional and marketing emails, ensuring reliable email delivery and communication with users.
+- Facebook OAuth: Integrates with Facebook for user authentication and access to Facebook APIs and services.
+- Replicate API: Utilized for transcription services, enabling the application to transcribe audio and video content efficiently.
+
 ### List of environment variables:
 - APP_KEY = 
 - BASE_URL = Address (URL) to run your project locally.
