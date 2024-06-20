@@ -89,7 +89,7 @@ export const clipRouter = createRouter()
             userId_twitch_id: { userId: ctx.session.user.userId, twitch_id: clip.twitch_id }
           },
           update: { ...clip },
-          create: { user: { connect: { id: ctx.session?.user?.userId! } }, ...clip }
+          create: { userId: ctx.session.user.userId, ...clip }
         });
       }
 
