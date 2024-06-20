@@ -83,16 +83,6 @@ export const clipRouter = createRouter()
 
       // Code Added: Code to add the fetched clips to the postgresDB so that the clip status can be saved and changed based on the user settings.
       // START OF NEW CODE
-      for (let clip of clips) {
-        await ctx.prisma.twitchClip.upsert({
-          where: {
-            userId_twitch_id: { userId: ctx.session.user.userId, twitch_id: clip.twitch_id }
-          },
-          update: { ...clip },
-          create: { userId: ctx.session.user.userId, ...clip }
-        });
-      }
-
       // Fetch the existing clips from the database for comparison
       const existingClips = await ctx.prisma.twitchClip.findMany({
         where: {
@@ -106,23 +96,34 @@ export const clipRouter = createRouter()
         existingClips.map((clip) => [clip.twitch_id, clip])
       );
 
-      // Merge the existing clips with the fetched clips, updating the approved status if necessary
-      clips = await Promise.all(clips.map(async (clip) => {
-        const existingClip = existingClipMap.get(clip.twitch_id);
-
-        if (existingClip) {
-          // If the clip already exists, retain its approved status and approval status
-          return { ...clip, approved: existingClip.approved, approvedStatus: existingClip.approvedStatus };
-        } else {
+      clips = await Promise.all(
+        clips.map(async (clip) => {
+          const existingClip = existingClipMap.get(clip.twitch_id);
           const userId = ctx.session?.user?.userId as string;
 
-          const newClip = await ctx.prisma.twitchClip.create({
-            data: { userId: userId, ...clip }
-          });
-
-          return newClip;
-        }
-      }));
+          if (existingClip) {
+            // Update existing clip and retain approval status
+            return await ctx.prisma.twitchClip.update({
+              where: {
+                userId_twitch_id: { userId: userId, twitch_id: clip.twitch_id }
+              },
+              data: {
+                ...clip,
+                approved: existingClip.approved,
+                approvedStatus: existingClip.approvedStatus
+              }
+            });
+          } else {
+            // Create new clip
+            return await ctx.prisma.twitchClip.create({
+              data: {
+                ...clip,
+                userId: userId
+              }
+            });
+          }
+        })
+      );
 
       // Fetch the user settings to determine if auto-approval should be applied
       const settings = await ctx.prisma.setting.findFirst({
