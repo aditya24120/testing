@@ -81,16 +81,19 @@ export const clipRouter = createRouter()
         clips = (await getPopularClips(user)) as Clip[];
       }
 
+      // Code Added: Code to add the fetched clips to the postgresDB so that the clip status can be saved and changed based on the user settings.
+      // START OF NEW CODE
       for (let clip of clips) {
         await ctx.prisma.twitchClip.upsert({
           where: {
             userId_twitch_id: { userId: ctx.session.user.userId, twitch_id: clip.twitch_id }
           },
           update: { ...clip },
-          create: { userId: ctx.session.user.userId, ...clip }
+          create: { user: { connect: { id: ctx.session?.user?.userId! } }, ...clip }
         });
       }
 
+      // Fetch the existing clips from the database for comparison
       const existingClips = await ctx.prisma.twitchClip.findMany({
         where: {
           userId: ctx.session.user.userId,
@@ -98,14 +101,17 @@ export const clipRouter = createRouter()
         }
       });
 
+      // Create a map of existing clips for quick lookup
       const existingClipMap = new Map(
         existingClips.map((clip) => [clip.twitch_id, clip])
       );
 
+      // Merge the existing clips with the fetched clips, updating the approved status if necessary
       clips = await Promise.all(clips.map(async (clip) => {
         const existingClip = existingClipMap.get(clip.twitch_id);
 
         if (existingClip) {
+          // If the clip already exists, retain its approved status and approval status
           return { ...clip, approved: existingClip.approved, approvedStatus: existingClip.approvedStatus };
         } else {
           const userId = ctx.session?.user?.userId as string;
@@ -118,15 +124,18 @@ export const clipRouter = createRouter()
         }
       }));
 
+      // Fetch the user settings to determine if auto-approval should be applied
       const settings = await ctx.prisma.setting.findFirst({
         where: { userId: ctx.session?.user?.userId! }
       });
 
       if (settings?.defaultApprove && settings.minViewCount) {
+        // Get the date from which auto-approval is considered
         const approveDate = new Date(settings.approveDate as Date);
 
         const userId = ctx.session?.user?.userId as string;
 
+        // Auto-approve clips based on view count and creation date
         clips = await Promise.all(clips.map(async (clip: any) => {
           if (!clip.approved && clip.view_count >= settings.minViewCount && new Date(clip.created_at) >= approveDate && clip.approvedStatus !== 'CANCELED') {
             try {
@@ -144,6 +153,7 @@ export const clipRouter = createRouter()
           return clip;
         }));
       }
+      // END OF NEW CODE
 
       return { clips, popularClips, count: clips.length };
     }
