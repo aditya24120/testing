@@ -131,12 +131,12 @@ Setting up Stripe webhook for deployed links:
 - Navigate to the developers tab on the Navbar again.
 - Go to the webhooks section.
 - Add a new endpoint with the endpoint URL as "https://[BASE_URL]/api/stripe/webhook". In my case, "https://app-dev.clipbot.tv/api/stripe/webhook" and select the following events:
-invoice.payment_failed
-customer.subscription.updated
-customer.subscription.created
-customer.card.updated
-customer.bank_account.updated
-customer.subscription.deleted
+  - invoice.payment_failed
+  - customer.subscription.updated
+  - customer.subscription.created
+  - customer.card.updated
+  - customer.bank_account.updated
+  - customer.subscription.deleted
 - After creating the webhook successfully, copy the signing secret after clicking on reveal and update the env variable on railway.
 
 ### Setting up Amplitude API for our Local App:
